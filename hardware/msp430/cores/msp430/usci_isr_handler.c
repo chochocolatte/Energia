@@ -1,5 +1,5 @@
 #include "Energia.h"
-#if defined(__MSP430_HAS_USCI__) || defined(__MSP430_HAS_EUSCI_A0__)
+#if defined(__MSP430_HAS_USCI__) || defined(__MSP430_HAS_EUSCI_A0__) || defined(__MSP430_HAS_USCI_A0__) || defined(__MSP430_HAS_USCI_B0__)
 #include "usci_isr_handler.h"
 
 /* This dummy function ensures that, when called from any module that 
@@ -18,6 +18,16 @@ void USCIA0_ISR(void)
     case USCI_UART_UCRXIFG: uart_rx_isr(); break;
     case USCI_UART_UCTXIFG: uart_tx_isr(); break;
   }  
+}
+#elif defined(__MSP430_HAS_USCI_A0__)
+__attribute__((interrupt(USCI_A0_VECTOR)))
+void USCIA0_ISR(void)
+{
+	if (UCA0IFG & UCTXIFG)
+		uart_tx_isr();
+	
+	if (UCA0IFG & UCRXIFG)
+		uart_rx_isr();
 }
 
 #else // #if defined(__MSP430_HAS_EUSCI_A0__)
