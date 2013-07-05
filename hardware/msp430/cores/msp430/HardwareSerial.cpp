@@ -128,15 +128,22 @@ void HardwareSerial::begin(unsigned long baud)
 	UCA0MCTLW = (oversampling ? UCOS16:0) | mod;
 
 #elif defined(__MSP430_HAS_USCI_A0__)
+  unsigned int ucbrf;
+  if (oversampling)
+  {
+    divider = (SMCLK>>4)/baud;
+    ucbrf = (SMCLK % (baud<<4)) / baud;
+  }
+  else
+  {
+    divider = SMCLK/baud;
+    ucbrf = (SMCLK % baud) / (baud >> 3);
+  }
 
-	/* USCI/UART Setup - Hard coded for 9600 baud */
-
-	UCA0BR0 = 19;//52;    // Integer part of UART frequency scaler (low byte)
-	UCA0BR1 = 0;     // Integer part of UART frequency scaler (high byte)
-
-//	UCA0MCTL = UCBRF_1 + UCBRS_0 + UCOS16; // This turns on oversampling and sets the decimal part of the scaler
-	UCA0MCTL = UCBRF_8 + UCBRS_0 + UCOS16; // This turns on oversampling and sets the decimal part of the scaler
-  
+  UCA0BR0 = divider;                   // Integer part of UART frequency scaler (low byte)
+  UCA0BR1 = divider>>8;                // Integer part of UART frequency scaler (high byte)
+  UCA0MCTL = ucbrf + UCBRS_0 + UCOS16; // This turns on oversampling and sets the decimal part of the scaler
+ 
 	/* Port Mapping */
 	PMAPPWD = 0x02D52;	// Get write-access to port mapping regs  
 	P1MAP1 = PM_UCA0RXD;	// Map UCA0RXD input to P1.1 
