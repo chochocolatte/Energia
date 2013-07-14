@@ -147,6 +147,38 @@ void twi_init(void)
     /* Enable state change and TX/RX interrupts */
     UC0IE |= UCB0RXIE | UCB0TXIE;
 #endif
+#ifdef __MSP430_HAS_USCI_B0__
+    /* Calling this dummy function prevents the linker
+     * from stripping the USCI interupt vectors.*/ 
+    usci_isr_install();
+
+    pinMode_int(TWISDA,TWISDA_SET_MODE);
+    pinMode_int(TWISCL,TWISCL_SET_MODE);
+
+    //Disable the USCI module and clears the other bits of control register
+    UCB0CTL1 = UCSWRST;
+
+     /*
+     * Configure as I2C Slave.
+     * UCMODE_3 = I2C mode
+     * UCSYNC = Synchronous mode
+     * UCCLK = SMCLK
+     */
+    UCB0CTL0 = UCMODE_3 | UCSYNC;
+    /*
+     * Compute the clock divider that achieves less than or
+     * equal to 100kHz.  The numerator is biased to favor a larger
+     * clock divider so that the resulting clock is always less than or equal
+     * to the desired clock, never greater.
+     */
+    UCB0BR0 = (unsigned char)((F_CPU / TWI_FREQ) & 0xFF);
+    UCB0BR1 = (unsigned char)((F_CPU / TWI_FREQ) >> 8);
+
+    UCB0CTL1 &= ~(UCSWRST);
+
+    /* Enable state change and TX/RX interrupts */
+    UCB0IE |= (UCRXIE|UCTXIE|UCALIE|UCNACKIE|UCSTTIE|UCSTPIE);
+#endif
 #ifdef __MSP430_HAS_EUSCI_B0__
 
     P1SEL1 |= BIT6 + BIT7;                  // Pin init
