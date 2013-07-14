@@ -37,8 +37,8 @@
 #endif
 
 #if defined(__MSP430_HAS_USCI_A0__)
-static const uint8_t UARTRXD = 6;  /* Receive  Data (RXD) at P1.5 */
-static const uint8_t UARTTXD = 5;  /* Transmit Data (TXD) at P1.6 */
+static const uint8_t UARTRXD = 14;  /* Receive  Data (RXD) at P3.7 */
+static const uint8_t UARTTXD = 15;  /* Transmit Data (TXD) at P3.6 */
 #define UARTRXD_SET_MODE (PORT_SELECTION0 | INPUT)
 #define UARTTXD_SET_MODE (PORT_SELECTION0 | OUTPUT)
 #endif

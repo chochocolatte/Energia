@@ -149,7 +149,7 @@ void twi_init(void)
 #endif
 #ifdef __MSP430_HAS_USCI_B0__
     /* Calling this dummy function prevents the linker
-     * from stripping the USCI interupt vectors.*/ 
+     * from stripping the USCI interrupt vectors.*/ 
     usci_isr_install();
 
     pinMode_int(TWISDA,TWISDA_SET_MODE);
@@ -165,6 +165,7 @@ void twi_init(void)
      * UCCLK = SMCLK
      */
     UCB0CTL0 = UCMODE_3 | UCSYNC;
+
     /*
      * Compute the clock divider that achieves less than or
      * equal to 100kHz.  The numerator is biased to favor a larger
