@@ -39,14 +39,14 @@
 #if defined(__MSP430_HAS_USCI_A0__)
 static const uint8_t UARTRXD = 14;  /* Receive  Data (RXD) at P3.7 */
 static const uint8_t UARTTXD = 15;  /* Transmit Data (TXD) at P3.6 */
-#define UARTRXD_SET_MODE (PORT_SELECTION0 | INPUT)
-#define UARTTXD_SET_MODE (PORT_SELECTION0 | OUTPUT)
+#define UARTRXD_SET_MODE (PORT_SELECTION0 | PORT_SELECTION1 | INPUT)
+#define UARTTXD_SET_MODE (PORT_SELECTION0 | PORT_SELECTION1 | OUTPUT)
 #endif
 
 #if defined(__MSP430_HAS_USCI_B0__)
 //Only set up for I2C right now
-static const uint8_t TWISDA  = 10; /* P1.3 */
-static const uint8_t TWISCL  = 11; /* P1.2 */
+static const uint8_t TWISDA  = 4; /* P1.7 */
+static const uint8_t TWISCL  = 5; /* P1.6 */
 #define TWISDA_SET_MODE  (PORT_SELECTION0 | PORT_SELECTION1 | INPUT_PULLUP)
 #define TWISCL_SET_MODE  (PORT_SELECTION0 | PORT_SELECTION1 | INPUT_PULLUP)
 #endif
@@ -141,90 +141,40 @@ const uint16_t port_to_input[] = {
 	NOT_A_PORT,
 	(uint16_t) &P1IN,
 	(uint16_t) &P2IN,
-#ifdef __MSP430_HAS_PORT3_R__
 	(uint16_t) &P3IN,
-#endif
-#ifdef __MSP430_HAS_PORT4_R__
-	(uint16_t) &P4IN,
-#endif
-#ifdef __MSP430_HAS_PORT5_R__
-	(uint16_t) &P5IN,
-#endif
-#ifdef __MSP430_HAS_PORTJ_R__
 	(uint16_t) &PJIN,
-#endif
 };
 
 const uint16_t port_to_output[] = {
 	NOT_A_PORT,
 	(uint16_t) &P1OUT,
 	(uint16_t) &P2OUT,
-#ifdef __MSP430_HAS_PORT3_R__
 	(uint16_t) &P3OUT,
-#endif
-#ifdef __MSP430_HAS_PORT4_R__
-	(uint16_t) &P4OUT,
-#endif
-#ifdef __MSP430_HAS_PORT5_R__
-	(uint16_t) &P5OUT,
-#endif
-#ifdef __MSP430_HAS_PORTJ_R__
 	(uint16_t) &PJOUT,
-#endif
 };
 
 const uint16_t port_to_dir[] = {
 	NOT_A_PORT,
 	(uint16_t) &P1DIR,
 	(uint16_t) &P2DIR,
-#ifdef __MSP430_HAS_PORT3_R__
 	(uint16_t) &P3DIR,
-#endif
-#ifdef __MSP430_HAS_PORT4_R__
-	(uint16_t) &P4DIR,
-#endif
-#ifdef __MSP430_HAS_PORT5_R__
-	(uint16_t) &P5DIR,
-#endif
-#ifdef __MSP430_HAS_PORTJ_R__
 	(uint16_t) &PJDIR,
-#endif
 };
 
 const uint16_t port_to_ren[] = {
 	NOT_A_PORT,
 	(uint16_t) &P1REN,
 	(uint16_t) &P2REN,
-#ifdef __MSP430_HAS_PORT3_R__
 	(uint16_t) &P3REN,
-#endif
-#ifdef __MSP430_HAS_PORT4_R__
-	(uint16_t) &P4REN,
-#endif
-#ifdef __MSP430_HAS_PORT5_R__
-	(uint16_t) &P5REN,
-#endif
-#ifdef __MSP430_HAS_PORTJ_R__
 	(uint16_t) NOT_A_PORT, //&PJREN
-#endif
 };
 
 const uint16_t port_to_sel0[] = {
 	NOT_A_PORT,
 	(uint16_t) &P1SEL,
 	(uint16_t) &P2SEL,
-#ifdef __MSP430_HAS_PORT3_R__
 	(uint16_t) &P3SEL,
-#endif
-#ifdef __MSP430_HAS_PORT4_R__
-	(uint16_t) &P4SEL,
-#endif
-#ifdef __MSP430_HAS_PORT5_R__
-	(uint16_t) &P5SEL,
-#endif
-#ifdef __MSP430_HAS_PORTJ_R__
 	(uint16_t) NOT_A_PORT, //&PJSEL,
-#endif
 };
 
 /* 
@@ -386,5 +336,16 @@ const uint8_t digital_pin_to_bit_mask[] = {
 	BV(4),       /* 47 - P2.4 */
 	BV(3),       /* 48 - P2.3 */
 };
+
+const uint16_t digital_pin_to_pm_reg[] = {
+  NOT_A_PIN,
+  (uint16_t) &P3MAP0,
+  (uint16_t) &P3MAP0,
+  (uint16_t) &P3MAP2,
+  (uint16_t) &P3MAP2,
+  (uint16_t) &P3MAP1
+  //etc
+};
+
 #endif
 #endif
