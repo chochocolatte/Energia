@@ -9,17 +9,7 @@ void usci_isr_install(){}
 
 
 
-#if defined(__MSP430_HAS_EUSCI_A0__)
-__attribute__((interrupt(USCI_A0_VECTOR)))
-void USCIA0_ISR(void)
-{
-  switch ( UCA0IV ) 
-  { 
-    case USCI_UART_UCRXIFG: uart_rx_isr(); break;
-    case USCI_UART_UCTXIFG: uart_tx_isr(); break;
-  }  
-}
-#elif defined(__MSP430_HAS_USCI_A0__)
+#ifdef __MSP430_HAS_USCI_A0__
 __attribute__((interrupt(USCI_A0_VECTOR)))
 void USCIA0_ISR(void)
 {
@@ -28,6 +18,16 @@ void USCIA0_ISR(void)
 	
 	if (UCA0IFG & UCRXIFG)
 		uart_rx_isr();
+}
+#elif defined(__MSP430_HAS_EUSCI_A0__)
+__attribute__((interrupt(USCI_A0_VECTOR)))
+void USCIA0_ISR(void)
+{
+  switch ( UCA0IV ) 
+  { 
+    case USCI_UART_UCRXIFG: uart_rx_isr(); break;
+    case USCI_UART_UCTXIFG: uart_tx_isr(); break;
+  }  
 }
 
 #else // #if defined(__MSP430_HAS_EUSCI_A0__)

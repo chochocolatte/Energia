@@ -275,3 +275,4 @@ void watchdog_isr (void)
         /* Exit from LMP3 on reti (this includes LMP0) */
         __bic_status_register_on_exit(LPM3_bits);
 }
+
