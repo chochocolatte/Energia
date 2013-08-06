@@ -93,10 +93,11 @@ void HardwareSerial::begin(unsigned long baud)
 {
 	unsigned int mod, divider;
 	unsigned char oversampling;
-	
+
 	/* Calling this dummy function prevents the linker
-	 * from stripping the USCI interupt vectors.*/ 
+	 * from stripping the USCI interupt vectors.*/
 	usci_isr_install();
+
 	if (SMCLK/baud>=48) {                                                // requires SMCLK for oversampling
 		oversampling = 1;
 	}
@@ -143,17 +144,15 @@ void HardwareSerial::begin(unsigned long baud)
   UCA0BR0 = divider;                   // Integer part of UART frequency scaler (low byte)
   UCA0BR1 = divider>>8;                // Integer part of UART frequency scaler (high byte)
   UCA0MCTL = ucbrf + UCBRS_0 + UCOS16; // This turns on oversampling and sets the decimal part of the scaler
- 
-	/* Port Mapping */
-	PMAPPWD = 0x02D52;	// Get write-access to port mapping regs  
-	P1MAP1 = PM_UCA0RXD;	// Map UCA0RXD input to P1.1 
-	P1MAP2 = PM_UCA0TXD;	// Map UCA0TXD output to P1.2
 
-	PMAPPWD = 0;		// Lock port mapping registers
+	/* USCI/UART Setup - Hard coded for 9600 baud */
+//	UCA0BR0 = 19;    // Integer part of UART frequency scaler (low byte)
+//	UCA0BR1 = 0;     // Integer part of UART frequency scaler (high byte)
+//	UCA0MCTL = UCBRF_8 + UCBRS_0 + UCOS16; // This turns on oversampling and sets the decimal part of the scaler
+  
 
-	P1DIR |= BIT2;	//Set P1.2 to output
-	P1SEL |= BIT1 | BIT2;	//Set P1.1 and P1.2 to USCI Mode
-
+//	P3DIR |= BIT6;	//Set P1.6 to output
+//	P3SEL |= BIT6 | BIT7;	//Set P1.6 and P1.7 to USCI Mode
 #else
 	if(!oversampling) {
 		mod = ((divider&0xF)+1)&0xE;                    // UCBRSx (bit 1-3)
@@ -167,10 +166,8 @@ void HardwareSerial::begin(unsigned long baud)
 	UCA0MCTL = (unsigned char)(oversampling ? UCOS16:0) | mod;
 #endif	
 	UCA0CTL1 &= ~UCSWRST;
-#if defined(__MSP430_HAS_EUSCI_A0__)
+#if defined(__MSP430_HAS_EUSCI_A0__) || defined(__MSP430_HAS_USCI_A0__)
 	UCA0IE |= UCRXIE;
-#elif defined(__MSP430_HAS_USCI_A0__)
-	UCA0IE = UCRXIE;
 #else
 	UC0IE |= UCA0RXIE;
 #endif	
