@@ -46,5 +46,6 @@ SWQUERY::SWQUERY(unsigned char dAddr, unsigned char rAddr, unsigned char rId)
   regId = rId;
   value.data = NULL;
   value.length = 0;
+  value.type = SWDTYPE_OTHER;
 }
 

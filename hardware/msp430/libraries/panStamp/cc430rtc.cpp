@@ -46,8 +46,8 @@
   RTCNT2 = (ticks >> 8) & 0xFF;            \
   RTCNT1 = ticks & 0xFF;
 
-#define RTC_ISR_ENABLE()                   (RTCCTL0 |= BIT6)
-#define RTC_ACK_ISR()                      (RTCCTL0 &= ~BIT2)
+#define RTC_ISR_ENABLE()                   (RTCCTL0 |= RTCTEVIE)
+#define RTC_ACK_ISR()                      (RTCCTL0 &= ~RTCTEVIFG)
 // 32.768 KHz cycles for 1 second
 #define RTC_32K_CYCLES_1SEC                32768UL
 // VLO cycles for 1 second
@@ -68,23 +68,14 @@ __interrupt void rtcISR(void)
   RTC_STOP_COUNTER();
   RTC_RESET_COUNTER();
 
-  if (status)
-  {
-    digitalWrite(13, LOW);
-    status = LOW;
-  }
-  else
-  {
-    digitalWrite(13, HIGH);
-    status = HIGH;
-  }
+//digitalWrite(13, LOW);
 }
 
 /**
  * sleep
  * 
  * Put panStamp into Power-down state during "time".
- * This function uses RTC_D connected to an external 32.768KHz crystal
+ * This function uses RTC connected to an external 32.768KHz crystal
  * in order to exit (interrupt) from the power-down state
  * 
  * @param time Sleeping time in seconds
@@ -112,10 +103,12 @@ void CC430RTC::sleep(unsigned int time, RTCSRC source)
   }
 
   RTC_SET_TICKS(ticks);               // Initialize 32-bit counter
-
-  RTC_ISR_ENABLE();                   // Enable RTC_D interrupt
-  RTC_START_32BIT_COUNTER();          // Start RTC_D counter with 32-bit overflow
+  RTC_ISR_ENABLE();                   // Enable RTC interrupt
+  RTC_START_32BIT_COUNTER();          // Start RTC counter with 32-bit overflow
 
   __bis_SR_register(LPM3_bits + GIE); // Enter LPM3 with interrupts
+ __no_operation();
+
+//digitalWrite(13, HIGH);
 }
 

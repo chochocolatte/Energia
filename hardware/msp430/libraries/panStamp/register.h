@@ -25,9 +25,12 @@
 #ifndef _REGISTER_H
 #define _REGISTER_H
 
-#include "Arduino.h"
+#include "datatypes.h"
 
 extern unsigned char regIndex;
+
+#define setRegValueBE     setValueFromCombinedInt
+#define serRegValue       setRegValueBE
 
 /**
  * Class: REGISTER
@@ -70,6 +73,16 @@ class REGISTER
     const unsigned char length;
 
     /**
+     * Data type
+     */
+    const SWDTYPE type;
+
+    /**
+     * Adddress in EEPROM. Set to -1 if no storage in EEPROM has to be done
+     */
+    const int eepromAddress;
+
+    /**
      * REGISTER
      * 
      * Constructor
@@ -78,8 +91,18 @@ class REGISTER
      * @param len Length of the register value
      * @param getValH Pointer to the getter function
      * @param setValH Pointer to the setter function
+     * @param typ Type of SWAP data (SWDTYPE)
+     * @param eepromAddr address in EEPROM. Set to -1 if the register value has not to
+     * be saved in EEPROM
      */
-    REGISTER(unsigned char *val, const unsigned char len, const void (*updateValH)(unsigned char rId), const void (*setValH)(unsigned char rId, unsigned char *v)):id(regIndex++), value(val), length(len), updateValue(updateValH), setValue(setValH) {};
+    REGISTER(unsigned char *val, const unsigned char len, const void (*updateValH)(unsigned char rId), const void (*setValH)(unsigned char rId, unsigned char *v), const SWDTYPE typ=SWDTYPE_OTHER, const int eepromAddr=-1):id(regIndex++), value(val), length(len), updateValue(updateValH), setValue(setValH), type(typ), eepromAddress(eepromAddr) {};
+
+    /**
+     * init
+     *
+     * Initialize register
+     */
+    void init(void);
 
     /**
      * getData
@@ -106,18 +129,31 @@ class REGISTER
     void sendSwapStatus(void);
 
     /**
-     * setRegValue
+     * setValueFromBeBuffer
      *
-     * Set register value from different data formats
-     * Use this method to simplify LE to BE conversion
+     * Set curent value from a Big Endian buffer passed as argument
+     *
+     * @param beBuffer Big Endian buffer
+     */
+    void setValueFromBeBuffer(unsigned char* beBuffer);
+
+    /**
+     * setValueFromCombinedInt
+     *
+     * Set register combined value from different integer formats
+     * Use this method to simplify LE to BE conversion.
      *
      * @param val New register value
+     * @param size length of the value
+     * @param offset starting point for the new partial value
      */
-    template<class T> void setRegValue(T val)
+    template<class T> void setValueFromCombinedInt(T val, unsigned char size=0 , unsigned char offset=0)
     {
-      uint8_t i;
+      int i, len;
 
-      for(i=0 ; i<length ; ++i)
+      size > 0 ? len = size : len = length;
+
+      for(i=len+offset-1 ; i<=offset ; i--)
       {
         value[i] = val & 0xFF;
         val >>= 8;
@@ -133,7 +169,7 @@ extern REGISTER* regTable[];
 /**
  * Extern global functions
  */
-extern void setupRegisters(void);
+//extern void setupRegisters(void);
 
 #endif
 

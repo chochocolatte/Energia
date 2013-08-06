@@ -215,18 +215,20 @@ REGISTER * getRegister(unsigned char regId)
  */
 void PANSTAMP::init() 
 {
+  unsigned char i;
+
   // Initialize MCU core
   core.init();
+
+  // Intialize registers
+  for(i=0 ; i<regTableSize ; i++)
+    regTable[i]->init();
 
   // Setup radio interface
   radio.init();
 
   // Security disabled by default
   security = 0;
-
-  // Read periodic Tx interval from EEPROM
-  //txInterval[0] = EEPROM.read(EEPROM_TX_INTERVAL);
-  //txInterval[1] = EEPROM.read(EEPROM_TX_INTERVAL + 1);
 
   delayMicroseconds(50);  
 
@@ -270,14 +272,12 @@ void PANSTAMP::wakeUp(bool rxOn)
  *
  * put the MCU in sleep mode
  *
- * @param source Source of interruption (RTCSRC_VL or RTCSRC_XT1)
+ * @param source Source of interruption (RTCSRC_VLO or RTCSRC_XT1)
  */
 void PANSTAMP::goToSleep(RTCSRC source)
 {
-  // Get the amount of seconds to sleep from the internal register
-  int intInterval = txInterval[0] * 0x100 + txInterval[1];
   // Sleep
-  rtc.sleep(intInterval, source);
+  rtc.sleep(txInterval, source);
 }
 
 /**
@@ -292,33 +292,6 @@ void PANSTAMP::enterSystemState(SYSTATE state)
   // Enter SYNC mode (full Rx mode)
   unsigned char newState[] = {state};
   regTable[REGI_SYSSTATE]->setData(newState);
-}
-
-/**
- * getInternalTemp
- * 
- * Read internal (ATMEGA328 only) temperature sensor
- * Reference: http://playground.arduino.cc/Main/InternalTemperatureSensor
- * 
- * @return Temperature in degrees Celsius
- */
-long PANSTAMP::getInternalTemp(void) 
-{
-  // Still working on this...
-
-  return 0;
-}
-
-/**
- * setTxInterval
- * 
- * Set interval for periodic transmissions
- * 
- * @param interval New periodic interval. 0 for asynchronous devices
- */
-void PANSTAMP::setTxInterval(unsigned char* interval)
-{
-  memcpy(txInterval, interval, sizeof(txInterval));
 }
 
 /**

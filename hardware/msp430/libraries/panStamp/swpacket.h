@@ -26,6 +26,7 @@
 #define _SWPACKET_H
 
 #include "ccpacket.h"
+#include "datatypes.h"
 
 /**
  * SWAP definitions
@@ -47,15 +48,7 @@ enum SWAPFUNCT
 };
 
 /**
- * Macros
- */
-#define smartDecrypt()         smartEncrypt(true)
-
-/**
- * Structure: SWDATA
- * 
- * Description:
- * SWAP data structure
+ * SWDATA : SWAP data structure
  */
 struct SWDATA
 {
@@ -68,7 +61,18 @@ struct SWDATA
      * Data length
      */
     unsigned char length;
+
+    /**
+     * Data type
+     */
+    SWDTYPE type;
 };
+
+/**
+ * Macros
+ */
+#define smartDecrypt()         smartEncrypt(true)
+
 
 class SWPACKET : public CCPACKET
 {

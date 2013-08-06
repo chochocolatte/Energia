@@ -39,7 +39,8 @@ class SWSTATUS : public SWPACKET
      * @param rId Register id
      * @param val Pointer to new value
      * @param len Buffer length
+     * @param type type of data contained
      */
-    SWSTATUS(unsigned char rId, unsigned char *val, unsigned char len);
+    SWSTATUS(unsigned char rId, unsigned char *val, unsigned char len, SWDTYPE type = SWDTYPE_OTHER);
 };
 #endif

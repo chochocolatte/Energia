@@ -19,34 +19,30 @@
  * USA
  * 
  * Author: Daniel Berenguer
- * Creation date: 06/03/2013
+ * Creation date: 06/27/2013
  */
 
-#include "swstatus.h"
-#include "panstamp.h"
+#ifndef _DATATYPES_H
+#define _DATATYPES_H
+
+#include "config.h"
 
 /**
- * SWSTATUS
- * 
- * Class constructor
- * 
- * @param rId Register id
- * @param val	Pointer to new value
- * @param len Buffer length
- * @param type type of data contained
+ * SWADDR : SWAP address data type
  */
-SWSTATUS::SWSTATUS(unsigned char rId, unsigned char *val, unsigned char len, SWDTYPE type) 
-{
-  destAddr = SWAP_BCAST_ADDR;
-  srcAddr = panstamp.radio.devAddress;
-  hop = 0;
-  security = panstamp.security & 0x0F;
-  nonce = ++panstamp.nonce;
-  function = SWAPFUNCT_STA;
-  regAddr = panstamp.radio.devAddress;
-  regId = rId;
-  value.length = len;
-  value.data = val;
-  value.type = type;
-}
+#ifdef SWAP_EXTENDED_ADDRESS
+#define SWADDR unsigned int
+#else
+#define SWADDR unsigned char
+#endif
 
+/**
+ * SWDTYPE : Type of data contained in SWAP register
+ */
+typedef enum SWDTYPE : unsigned char
+{
+  SWDTYPE_INTEGER = 0,    // Register containing a single 1-to-4 byte integer
+  SWDTYPE_OTHER           // Other type of register contents
+} SWDTYPE;
+
+#endif

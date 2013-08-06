@@ -22,31 +22,20 @@
  * Creation date: 06/03/2013
  */
 
-#include "swstatus.h"
-#include "panstamp.h"
+#ifndef _NVOLAT_H
+#define _NVOLAT_H
+
+//#include <EEPROM.h>
 
 /**
- * SWSTATUS
- * 
- * Class constructor
- * 
- * @param rId Register id
- * @param val	Pointer to new value
- * @param len Buffer length
- * @param type type of data contained
+ * EEPROM addresses
  */
-SWSTATUS::SWSTATUS(unsigned char rId, unsigned char *val, unsigned char len, SWDTYPE type) 
-{
-  destAddr = SWAP_BCAST_ADDR;
-  srcAddr = panstamp.radio.devAddress;
-  hop = 0;
-  security = panstamp.security & 0x0F;
-  nonce = ++panstamp.nonce;
-  function = SWAPFUNCT_STA;
-  regAddr = panstamp.radio.devAddress;
-  regId = rId;
-  value.length = len;
-  value.data = val;
-  value.type = type;
-}
+#define EEPROM_FREQ_CHANNEL       0x00   // 1-byte register
+#define EEPROM_NOT_USED           0x01   // 1-byte register
+#define EEPROM_SYNC_WORD          0x02   // 2-byte register
+#define EEPROM_DEVICE_ADDR        0x04   // 1-byte register
+#define EEPROM_TX_INTERVAL        0x05   // 2-byte register
 
+#define EEPROM_FIRST_CUSTOM       0x20
+
+#endif

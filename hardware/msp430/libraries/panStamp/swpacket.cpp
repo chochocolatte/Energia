@@ -44,6 +44,7 @@ SWPACKET::SWPACKET(CCPACKET packet)
   regId = packet.data[6];
   value.data = packet.data + 7;
   value.length = packet.length - SWAP_DATA_HEAD_LEN - 1;
+  value.type = SWDTYPE_OTHER;
 
   // Need to decrypt packet?
   if (security & 0x02)
@@ -57,6 +58,7 @@ SWPACKET::SWPACKET(CCPACKET packet)
  */
 SWPACKET::SWPACKET(void) 
 {
+  value.type = SWDTYPE_OTHER;
 }
 
 /**
@@ -88,9 +90,18 @@ bool SWPACKET::send(void)
   packet.data[5] = regAddr;
   packet.data[6] = regId;
 
-  for(i=0 ; i<value.length ; i++)
-    packet.data[i+7] = value.data[i];
+  if (value.type == SWDTYPE_INTEGER)
+  {
+    for(i=0 ; i<value.length ; i++)
+      packet.data[i+7] = value.data[value.length-1-i];
+  }
+  else
+  {
+    for(i=0 ; i<value.length ; i++)
+      packet.data[i+7] = value.data[i];
+  }
 
+  // Transmit packet
   i = SWAP_NB_TX_TRIES;
   while(!(res = panstamp.radio.sendData(packet)) && i>1)
   {

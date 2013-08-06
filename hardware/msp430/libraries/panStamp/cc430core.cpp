@@ -24,16 +24,28 @@
 
 #include "cc430core.h"
 #include "cc430x513x.h"
+#include "cc430pins.h"
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
+#include "utility/pmm.h"
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * init
  * 
- * Initialize CC1101
+ * Initialize CC430 core
  */
 void CC430CORE::init(void) 
 {
+	// Configure PMM
+	SetVCore(1);
+
   // Set the High-Power Mode Request Enable bit so LPM3 can be entered
-  // with active radio enabled 
+  // with active radio enabled
   PMMCTL0_H = 0xA5;
   PMMCTL0_L |= PMMHPMRE_L; 
   PMMCTL0_H = 0x00; 
@@ -49,7 +61,7 @@ void CC430CORE::init(void)
    * Select XT1 as FLL reference
    */
   UCSCTL3 = SELA__XT1CLK;
-  UCSCTL4 = SELA__XT1CLK | SELS__DCOCLKDIV | SELM__DCOCLKDIV;   
+  UCSCTL4 = SELA__XT1CLK | SELS__DCOCLKDIV | SELM__DCOCLKDIV;  
 
   /**
    * Configure CPU clock for 12MHz
@@ -66,8 +78,8 @@ void CC430CORE::init(void)
   // 32 x 32 x 8 MHz / 32,768 Hz = 250000 = MCLK cycles for DCO to settle
   __delay_cycles(250000);
 
-  // Loop until XT1 & DCO stabilizes, use do-while to insure that 
-  // body is executed at least once
+  // Loop until XT1 & DCO stabilizes, use do-while to ensure that 
+  // the body is executed at least once
   do
   {
     UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
@@ -79,5 +91,14 @@ void CC430CORE::init(void)
    * Interrupt Edge select register: 1 == Interrupt on High to Low transition.
    */
   RF1AIES = BIT0 | BIT9;
+
+  /**
+   * Pin mapping
+   */
+	PMAPPWD = 0x02D52;	  // Get write-access to port mapping regs
+  PMAPCTL |= PMAPRECFG; // Leave Pin mapping open
+  pinUARTmap();         // Map UART pins
+  pinI2Cmap();          // Map I2C pins
+	PMAPPWD = 0;		      // Lock port mapping registers
 }
 

@@ -25,6 +25,7 @@
 #ifndef _COMMONREGS_H
 #define _COMMONREGS_H
 #include "swstatus.h"
+#include "eeprom.h"
 /**
  * Macros for the definition of common register indexes
  */
@@ -65,7 +66,7 @@ REGISTER regFwVersion(dtFwVersion, sizeof(dtFwVersion), NULL, NULL);            
 /* System state */                                                                                                           \
 REGISTER regSysState(&panstamp.systemState, sizeof(panstamp.systemState), NULL, &setSysState);                               \
 /* Frequency channel */                                                                                                      \
-REGISTER regFreqChannel(&panstamp.radio.channel, sizeof(panstamp.radio.channel), NULL, &setFreqChannel);                   \
+REGISTER regFreqChannel(&panstamp.radio.channel, sizeof(panstamp.radio.channel), NULL, &setFreqChannel, SWDTYPE_OTHER, EEPROM_FREQ_CHANNEL); \
 /* Security option */                                                                                                        \
 REGISTER regSecuOption(&panstamp.security, sizeof(panstamp.security), NULL, NULL);                                           \
 /* Security password (not implemented yet) */                                                                                \
@@ -74,11 +75,11 @@ REGISTER regPassword(dtPassword, sizeof(dtPassword), NULL, NULL);               
 /* Security nonce */                                                                                                         \
 REGISTER regSecuNonce(&panstamp.nonce, sizeof(panstamp.nonce), NULL, NULL);                                                  \
 /* Network Id */                                                                                                             \
-REGISTER regNetworkId(panstamp.radio.syncWord, sizeof(panstamp.radio.syncWord), NULL, &setNetworkId);                      \
+REGISTER regNetworkId(panstamp.swapNetworkId, sizeof(panstamp.swapNetworkId), NULL, &setNetworkId);                        \
 /* Device address */                                                                                                         \
-REGISTER regDevAddress(&panstamp.radio.devAddress, sizeof(panstamp.radio.devAddress), NULL, &setDevAddress);               \
+REGISTER regDevAddress((unsigned char*)panstamp.swapAddress, sizeof(panstamp.swapAddress), NULL, &setDevAddress, SWDTYPE_INTEGER);          \
 /* Periodic Tx interval */                                                                                                   \
-REGISTER regTxInterval(panstamp.txInterval, sizeof(panstamp.txInterval), NULL, &setTxInterval);
+REGISTER regTxInterval((unsigned char*)panstamp.txInterval, sizeof(panstamp.txInterval), NULL, &setTxInterval, SWDTYPE_INTEGER);
 
 /**
  * Macros for the declaration of global table of registers
@@ -170,16 +171,16 @@ const void setFreqChannel(unsigned char id, unsigned char *channel)           \
  * @param id Register ID                                    \
  * @param addr New device address                           \
  */                                                         \
-const void setDevAddress(unsigned char id, unsigned char *addr)               \
+const void setDevAddress(unsigned char id, unsigned char *addr)  \
 {                                                           \
-  if ((addr[0] > 0) && (addr[0] != regDevAddress.value[0])) \
-  {                                                         \
-    /* Send status before setting the new address */        \
-    SWSTATUS packet = SWSTATUS(regDevAddress.id, addr, regDevAddress.length); \
-    packet.send();                                          \
-    /* Update register value */                             \
-    panstamp.radio.setDevAddress(addr[0]);                  \
-  }                                                         \
+  /* Send status before setting the new address */          \
+  SWSTATUS packet = SWSTATUS(regDevAddress.id, addr, regDevAddress.length); \
+  packet.send();                                            \
+  /* Update register value */                               \ 
+  /* Set new SWAP address. BE to LE conversion */           \
+  regDevAddress.setValueFromBeBuffer(addr);                 \
+  /* Set new radio (1 byte) address */                      \
+  panstamp.radio.setDevAddress(addr[0]);                    \
 }                                                           \
                                                             \
 /**                                                         \
@@ -190,7 +191,7 @@ const void setDevAddress(unsigned char id, unsigned char *addr)               \
  * @param rId Register ID                                   \
  * @paramn Id New network id                                \
  */                                                         \
-const void setNetworkId(unsigned char rId, unsigned char *nId)                \
+const void setNetworkId(unsigned char rId, unsigned char *nId) \
 {                                                           \
   if ((nId[0] != regNetworkId.value[0]) ||                  \
       (nId[1] != regNetworkId.value[1]))                    \
@@ -210,13 +211,10 @@ const void setNetworkId(unsigned char rId, unsigned char *nId)                \
  * @param id   Register ID                                  \
  * @param interval New interval (in seconds)                \
  */                                                         \
-const void setTxInterval(unsigned char id, unsigned char *interval)           \
+const void setTxInterval(unsigned char id, unsigned char *interval) \
 {                                                           \
-  if ((interval[0] != regTxInterval.value[0]) ||            \
-      (interval[1] != regTxInterval.value[1]))              \
-  {                                                         \
-    panstamp.setTxInterval(interval);                       \
-  }                                                         \
+  /* Set new Tx interval. BE to LE conversion */            \
+  regTxInterval.setValueFromBeBuffer(interval);             \
 }
 #endif
 

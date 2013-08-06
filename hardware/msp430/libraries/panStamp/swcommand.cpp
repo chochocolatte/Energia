@@ -49,5 +49,6 @@ SWCOMMAND::SWCOMMAND(unsigned char dAddr, unsigned char secNonce, unsigned char 
   regId = rId;
   value.data = val;
   value.length = len;
+  value.type = SWDTYPE_OTHER;
 }
 

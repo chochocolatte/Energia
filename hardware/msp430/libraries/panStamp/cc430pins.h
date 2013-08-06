@@ -19,34 +19,18 @@
  * USA
  * 
  * Author: Daniel Berenguer
- * Creation date: 06/03/2013
+ * Creation date: 08/05/2013
  */
 
-#include "swstatus.h"
-#include "panstamp.h"
+#ifndef _CC430PINS_H
+#define _CC430OINS_H
 
-/**
- * SWSTATUS
- * 
- * Class constructor
- * 
- * @param rId Register id
- * @param val	Pointer to new value
- * @param len Buffer length
- * @param type type of data contained
- */
-SWSTATUS::SWSTATUS(unsigned char rId, unsigned char *val, unsigned char len, SWDTYPE type) 
-{
-  destAddr = SWAP_BCAST_ADDR;
-  srcAddr = panstamp.radio.devAddress;
-  hop = 0;
-  security = panstamp.security & 0x0F;
-  nonce = ++panstamp.nonce;
-  function = SWAPFUNCT_STA;
-  regAddr = panstamp.radio.devAddress;
-  regId = rId;
-  value.length = len;
-  value.data = val;
-  value.type = type;
-}
+// UART
+#define pinUARTmap()      P3MAP6 = PM_UCA0TXD; P3MAP7 = PM_UCA0RXD
+#define pinUARTconfig()   P3SEL |= BIT6 | BIT7;     // Set P3.6 and P3.7 to USCI Mode
+// I2C
+#define pinI2Cmap()       P1MAP6 = PM_UCB0SCL; P1MAP7 = PM_UCB0SDA
+#define pinI2Cconfig()    P1SEL |= BIT6 | BIT7;     // Set P1.6 and P1.7 to USCI function
+
+#endif
 

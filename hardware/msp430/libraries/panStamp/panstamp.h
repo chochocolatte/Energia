@@ -28,7 +28,6 @@
 #include "cc430core.h"
 #include "cc430radio.h"
 #include "cc430rtc.h"
-#include "nvolat.h"
 #include "register.h"
 #include "swpacket.h"
 #include "config.h"
@@ -60,6 +59,11 @@
 #define setLowTxPower()     radio.setTxPowerAmp(PA_LowPower)
 
 #define enableAntiPlayback()    security |= 0x01
+
+#ifndef SWAP_EXTENDED_ADDRESS
+#define swapAddress         radio.devAddress
+#endif
+#define swapNetworkId       radio.syncWord
 
 /**
  * System states
@@ -103,30 +107,37 @@ class PANSTAMP
      */
     CC430RADIO radio;
     
+    #ifdef SWAP_EXTENDED_ADDRESS
+    /**
+     * SWAP extended address
+     */
+    SWADDR swapAddress;
+    #endif
+
     /**
      * Security options
      */
-    byte security;
+    unsigned char security;
 
     /**
      * Security cyclic nonce
      */
-    byte nonce;
+    unsigned char nonce;
     
     /**
      * System state
      */
-    byte systemState;
+    unsigned char systemState;
 
     /**
      * Interval between periodic transmissions. 0 for asynchronous transmissions
      */
-    byte txInterval[2];
+    unsigned int txInterval;
 
     /**
      * Smart encryption password
      */
-    byte encryptPwd[12];
+    unsigned char encryptPwd[12];
 
     /**
      * enableRepeater
@@ -142,7 +153,7 @@ class PANSTAMP
      *
      * @param maxHop Maximum repeater count. Zero if omitted
      */
-    void enableRepeater(byte maxHop=0);
+    void enableRepeater(unsigned char maxHop=0);
 
     /**
      * SWAP status packet received. Callback function
@@ -184,7 +195,7 @@ class PANSTAMP
      *
      * put the MCU in sleep mode
      *
-     * @param source Source of interruption (RTCSRC_VL or RTCSRC_XT1)
+     * @param source Source of interruption (RTCSRC_VLO or RTCSRC_XT1)
      */
     void goToSleep(RTCSRC source=RTCSRC_XT1);
 
@@ -198,32 +209,13 @@ class PANSTAMP
     void enterSystemState(SYSTATE state);
 
     /**
-     * getInternalTemp
-     * 
-     * Read internal (ATMEGA328 only) temperature sensor
-     * Reference: http://playground.arduino.cc/Main/InternalTemperatureSensor
-     * 
-     * @return Temperature in degrees Celsius
-     */
-    long getInternalTemp(void);
-
-    /**
-     * setTxInterval
-     * 
-     * Set interval for periodic transmissions
-     * 
-     * @param interval New periodic interval. 0 for asynchronous devices
-     */
-    void setTxInterval(byte* interval);
-
-    /**
      * setSmartPassword
      * 
      * Set Smart Encryption password
      * 
      * @param password Encryption password
      */
-    void setSmartPassword(byte* password);
+    void setSmartPassword(unsigned char* password);
 };
 
 /**
@@ -238,7 +230,7 @@ extern PANSTAMP panstamp;
  *
  * @param regId Register ID
  */
-REGISTER * getRegister(byte regId);
+REGISTER * getRegister(unsigned char regId);
 
 #endif
 

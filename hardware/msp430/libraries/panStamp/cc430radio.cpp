@@ -25,7 +25,7 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#include "utility/pmm.h"
+//#include "utility/pmm.h"
 #include "utility/rf1a.h"
 #ifdef __cplusplus
 }
@@ -83,7 +83,6 @@ void CC430RADIO::reset(void)
   Strobe(RF_SNOP);                      // Reset Radio Pointer
 
   setDefaultRegs();                     // Reconfigure CC1101
-  //setRegsFromEeprom();                  // Take user settings from EEPROM
 }
 
 /**
